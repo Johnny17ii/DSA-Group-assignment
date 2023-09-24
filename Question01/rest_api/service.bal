@@ -1,78 +1,64 @@
 import ballerina/http;
 
+service /lecturer/status on new http:Listener(9000) {
 
-service /lecturer on new http:Listener(9090){
-    //
-    private table<Lecturer> key(staffNumber) lecturers;
-    private table<Office> key(officeId) offices;
-
-    function init() {
-        self.lecturers = table [];
-        self.offices = table [];
+    resource function get lecturers() returns LecturerEntry[] {
+        return lecturerTable.toArray();
     }
 
-    isolated resource function get all() returns Lecturer[] {
-        return self.lecturers.toArray();
-    }
+    resource function post lecturers(@http:Payload LecturerEntry[] lecturerEntries)
+                                    returns LecturerEntry[]|ConflictingStaffNumberCodesError {
 
-    resource function get lecturers/[string staffNumber]() returns Lecturer|InvalidLecturer{
-        Lecturer? course = self.lecturers[staffNumber];
+        string[] conflictingStaffNumbers = from LecturerEntry lecturerEntry in lecturerEntries
+            where lecturerTable.hasKey(lecturerEntry.staffNumber)
+            select lecturerEntry.staffNumber;
 
-        if course == () {
-            return <InvalidLecturer>{
-                body: {ErrorMsg: string `Error: lecturer doesnt exist`}
-            };
-        } else {
-            return course;
-        }
-    }
-
-    resource function post lecturers(@http:Payload Lecturer newLecturer) returns ExistingLecturer|ConflictingStaffNumber {
-        string[] existingCourses = from var {staffNumber} in self.lecturers
-            where staffNumber == newLecturer.staffNumber select staffNumber;
-            
-        if existingCourses.length() > 0 {
-            return <ConflictingStaffNumber> {
+        if conflictingStaffNumbers.length() > 0 {
+            return {
                 body: {
-                    ErrorMsg: string `Error: Conflicting staff number!`
+                    errmsg: string:'join(" ", "Conflicting StaffNumber Id:", ...conflictingStaffNumbers)
                 }
             };
         } else {
-            self.lecturers.add(newLecturer);
-
-            return <ExistingLecturer>{body: newLecturer};
+            lecturerEntries.forEach(letcurerEntry => lecturerTable.add(letcurerEntry));
+            return lecturerEntries;
         }
+    }
+
+    resource function get lecturers/[string staffNumber]() returns LecturerEntry|InvalidStaffNumberCodeError {
+        LecturerEntry? lecturerEntry = lecturerTable[staffNumber];
+        if lecturerEntry is () {
+            return {
+                body: {
+                    errmsg: string `Invalid StaffNumber Id: ${staffNumber}`
+                }
+            };
+        }
+        return lecturerEntry;
     }
 }
 
-// Adding the definition of the record
-public type Lecturer record {|
+public type LecturerEntry record {|
     readonly string staffNumber;
     string name;
-    string officeId;
-    string[] courseId;
 |};
 
-public type Office record {|
-    readonly string officeId;
-    string name;
-|};
+public final table<LecturerEntry> key(staffNumber) lecturerTable = table [
+    {staffNumber: "001", name: "Angela"},
+    {staffNumber: "002", name: "Sri Lanka"},
+    {staffNumber: "003", name: "Makahala"}
+];
 
-public type ConflictingStaffNumber record {|
+public type ConflictingStaffNumberCodesError record {|
     *http:Conflict;
     ErrorMsg body;
 |};
 
-public type ErrorMsg record {|
-    string ErrorMsg;
-|};
-
-public type ExistingLecturer record {|
-    *http:Created;
-    Lecturer body;
-|};
-
-public type InvalidLecturer record{|
+public type InvalidStaffNumberCodeError record {|
     *http:NotFound;
     ErrorMsg body;
+|};
+
+public type ErrorMsg record {|
+    string errmsg;
 |};
