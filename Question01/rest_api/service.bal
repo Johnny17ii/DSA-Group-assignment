@@ -41,12 +41,14 @@ service /lecturer/status on new http:Listener(9000) {
 public type LecturerEntry record {|
     readonly string staffNumber;
     string name;
+    string officeId;
+    string[] courses;
 |};
 
 public final table<LecturerEntry> key(staffNumber) lecturerTable = table [
-    {staffNumber: "001", name: "Angela"},
-    {staffNumber: "002", name: "Sri Lanka"},
-    {staffNumber: "003", name: "Makahala"}
+    {staffNumber: "001", name: "Isaac", officeId: "A01", courses: ["DSA612S"]},
+    {staffNumber: "002", name: "Simon", officeId: "A02", courses: ["DSA612S", "MAP711S"]},
+    {staffNumber: "003", name: "Ndinelago", officeId: "A03", courses: ["DSA612S", "ICG511S"]}
 ];
 
 public type ConflictingStaffNumberCodesError record {|
