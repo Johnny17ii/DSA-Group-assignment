@@ -19,8 +19,8 @@ service "Library" on ep {
 
     // Function to add a book to the library.
     remote function addBook(Book value) returns string|error {
-        // Generate a unique ISBN for the book (you can implement your logic here).
-        string isbn = generateUniqueISBN();
+        // Generate a unique ISBN for the book .
+        string isbn = UniqueISBN();
         value.isbn = isbn;
 
         // Add the book to the library.
@@ -42,7 +42,7 @@ service "Library" on ep {
         while (true) {
             var userResult = clientStream->receive();
             if (userResult is User) {
-                // Process the user (you can implement your logic here).
+                // Process the user 
                 userIDs += userResult.id + ", ";
             } else if (userResult is grpc:Error) {
                 // Handle errors if needed.
