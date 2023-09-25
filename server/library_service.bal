@@ -20,7 +20,7 @@ service "Library" on ep {
     // Function to add a book to the library.
     remote function addBook(Book value) returns string|error {
         // Generate a unique ISBN for the book .
-        string isbn = generateUniqueISBN();
+        string isbn = UniqueISBN();
         value.isbn = isbn;
 
         // Add the book to the library.
