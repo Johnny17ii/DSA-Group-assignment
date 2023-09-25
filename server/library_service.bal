@@ -1,4 +1,5 @@
 import ballerina/grpc;
+import ballerinax/mongodb;
 import ballerina/io;
 
 listener grpc:Listener ep = new (9090);
