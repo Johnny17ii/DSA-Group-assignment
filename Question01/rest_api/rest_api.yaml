@@ -1,0 +1,95 @@
+info:
+  title: Faculty Lecturer API
+  version: 1.0.0
+paths:
+  /lecturers:
+    get:
+      summary: Retrieve a list of all lecturers within the faculty.
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Add a new lecturer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lecturer'
+      responses:
+        '201':
+          description: Created
+  /lecturers/{staffNumber}:
+    get:
+      summary: Retrieve the details of a specific lecturer by their staff number.
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    put:
+      summary: Update an existing lecturer's information.
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lecturer'
+      responses:
+        '200':
+          description: OK
+    delete:
+      summary: Delete a lecturer's record by their staff number.
+      parameters:
+        - name: staffNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+  /lecturers/courses/{courseId}:
+    get:
+      summary: Retrieve all the lecturers that teach a certain course.
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /lecturers/offices/{officeId}:
+    get:
+      summary: Retrieve all the lecturers that sit in the same office.
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+
+components:
+  schemas:
+    Lecturer:
+      type: object
+      properties:
+        staffNumber:
+          type: string
+        name:
+          type: string
